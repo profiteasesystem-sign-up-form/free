@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profit Ease System – Registration & Info Form</title>
+    <!-- Load Tailwind for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* --- General Styling --- */
+        :root {
+            --color-primary: #1E8449; /* Green Accent */
+            --color-secondary: #333; /* Dark Gray Text */
+            --color-background: #ffffff;
+            --color-card-bg: #f9f9f9;
+            --color-shadow: rgba(0, 0, 0, 0.1);
+            --color-error: #e74c3c;
+            --font-family: 'Inter', 'Arial', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--color-background);
+            color: var(--color-secondary);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        header {
+            background-color: var(--color-background);
+            box-shadow: 0 2px 8px var(--color-shadow);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        .logo-text {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--color-primary);
+        }
+
+        .nav-links {
+            /* Now using flex layout consistently */
+            display: flex; 
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: var(--color-secondary);
+            text-decoration: none;
+            padding: 5px 0;
+            transition: color 0.3s;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+        }
+
+        .nav-links a:hover {
+            color: var(--color-primary);
+            border-bottom: 2px solid var(--color-primary);
+        }
+
+        /* --- Modal Styling --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        
+        .modal-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 90vw;
+            width: 400px;
+        }
+
+        .modal-content h3 {
+            font-size: 1.6em;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .modal-btn {
+            background-color: #f0f0f0;
+            color: var(--color-secondary);
+            border: 2px solid #ccc;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+        }
+
+        .modal-btn:hover {
+            background-color: var(--color-primary);
+            border-color: var(--color-primary);
+            color: white;
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            padding: 60px 0;
+            text-align: center;
+            background-color: var(--color-card-bg);
+            margin-bottom: 30px;
+            box-shadow: inset 0 -3px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .hero h1 {
+            font-size: clamp(2em, 5vw, 3em); /* Responsive font size */
+            color: var(--color-primary);
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            font-size: 1.1em;
+            color: var(--color-secondary);
+        }
+
+        /* --- Form Card --- */
+        .form-card {
+            background-color: var(--color-card-bg);
+            border-radius: 12px;
+            padding: clamp(20px, 5vw, 40px);
+            box-shadow: 0 8px 20px var(--color-shadow);
+            max-width: 700px;
+            margin: 30px auto;
+        }
+
+        .form-card h2 {
+            text-align: center;
+            color: var(--color-primary);
+            margin-bottom: 25px;
+        }
+
+        /* --- Form Layout (CSS Grid for flexibility) --- */
+        #registration-form {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            width: 100%;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 2px rgba(30, 132, 73, 0.2);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 30px;
+            margin-top: 5px;
+        }
+
+        .radio-group div {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .radio-group input[type="radio"] {
+            width: initial;
+        }
+
+        /* Responsive Grid layout for larger screens */
+        @media (min-width: 600px) {
+            #registration-form {
+                grid-template-columns: 1fr 1fr;
+            }
+            .full-width {
+                grid-column: span 2;
+            }
+            /* Nav links are always displayed now */
+        }
+
+        /* --- Consent and Submit --- */
+        .consent-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 10px;
+            grid-column: span 1 / -1;
+            font-size: 0.95em;
+        }
+
+        .consent-group input[type="checkbox"] {
+            margin-top: 4px;
+            min-width: 18px;
+            min-height: 18px;
+            cursor: pointer;
+        }
+
+        .submit-btn {
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.25em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            grid-column: span 1 / -1;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(30, 132, 73, 0.3);
+        }
+
+        .submit-btn:hover {
+            background-color: #156535;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* --- Messages and Errors --- */
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            grid-column: span 1 / -1;
+            display: none; 
+        }
+
+        .error-message {
+            color: var(--color-error);
+            font-size: 0.85em;
+            margin-top: 5px;
+            height: 1.2em;
+            transition: opacity 0.3s;
+        }
+        .error-message:empty {
+             height: 0;
+             margin-top: 0;
+        }
+
+
+        /* --- Privacy Section --- */
+        .privacy-disclaimer {
+            padding: 40px 0;
+            background-color: #f0f4f7;
+            margin-top: 40px;
+            border-top: 1px solid #ccc;
+        }
+
+        .privacy-disclaimer h2 {
+            color: var(--color-secondary);
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+
+        .disclaimer-content {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px var(--color-shadow);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .disclaimer-content p {
+            margin-bottom: 15px;
+            font-size: 0.95em;
+            text-align: justify;
+        }
+
+        .disclaimer-content p:last-child {
+            margin-bottom: 0;
+            font-weight: 600;
+            color: var(--color-error);
+        }
+
+        /* --- Language Specific Classes --- */
+        /* BASE STATE: Both languages and separator are visible by default */
+        .separator {
+            display: inline;
+            color: #999; 
+            font-weight: normal;
+        }
+        .lang-en, .lang-es {
+            display: inline;
+        }
+
+        /* ENGLISH SELECTED: Hide Spanish and Separator */
+        body.english .lang-es,
+        body.english .separator {
+            display: none;
+        }
+
+        /* SPANISH SELECTED: Hide English and Separator */
+        body.spanish .lang-en,
+        body.spanish .separator {
+            display: none;
+        }
+        
+        /* Ensure language spans are correctly toggled */
+        .lang-en, .lang-es {
+            display: inline;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Language Selection Modal (Always on top) -->
+    <div id="language-modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Choose Your Language / Elige tu Idioma</h3>
+            <p>Please select your preferred language to continue.</p>
+            <p>Por favor, selecciona tu idioma preferido para continuar.</p>
+            <div class="modal-buttons">
+                <button id="select-en" class="modal-btn">English</button>
+                <button id="select-es" class="modal-btn">Español</button>
+            </div>
+        </div>
+    </div>
+    
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo-text">Profit Ease System</div>
+                <div class="nav-links">
+                    <a href="#">
+                        <span class="lang-en">Home</span><span class="separator"> / </span><span class="lang-es">Inicio</span>
+                    </a>
+                    <a href="#registration">
+                        <span class="lang-en">Register</span><span class="separator"> / </span><span class="lang-es">Registro</span>
+                    </a>
+                    <a href="#">
+                        <span class="lang-en">How It Works</span><span class="separator"> / </span><span class="lang-es">Cómo Funciona</span>
+                    </a>
+                    <a href="#">
+                        <span class="lang-en">Contact</span><span class="separator"> / </span><span class="lang-es">Contacto</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="hero">
+            <div class="container">
+                <h1>
+                    <span class="lang-en">Join Profit Ease System</span><span class="separator"> / </span><span class="lang-es">Únete al Sistema Profit Ease</span>
+                </h1>
+                <p>
+                    <span class="lang-en">Fill in your details to receive more information and updates.</span><span class="separator"> / </span><span class="lang-es">Completa tus datos para recibir más información y actualizaciones.</span>
+                </p>
+            </div>
+        </div>
+
+        <section id="registration" class="container">
+            <div class="form-card">
+                <h2>
+                    <span class="lang-en">Registration & Info Form</span><span class="separator"> / </span><span class="lang-es">Formulario de Registro e Información</span>
+                </h2>
+                
+                <form id="registration-form" novalidate>
+                    
+                    <!-- Submission Message -->
+                    <div id="form-message" class="message success-message full-width">
+                        <span class="lang-en">Preparing email... Please click send in your email client.</span><span class="separator"> / </span><span class="lang-es">Preparando correo... Por favor, haz clic en Enviar en tu cliente de correo.</span>
+                    </div>
+
+                    <!-- Full Name -->
+                    <div class="form-group full-width">
+                        <label for="full-name">
+                            <span class="lang-en">Full Name</span><span class="separator"> / </span><span class="lang-es">Nombre completo</span>
+                        </label>
+                        <input type="text" id="full-name" name="fullName" required>
+                        <p class="error-message" id="error-fullName"></p>
+                    </div>
+
+                    <!-- Email Address -->
+                    <div class="form-group full-width">
+                        <label for="email">
+                            <span class="lang-en">Email Address</span><span class="separator"> / </span><span class="lang-es">Correo electrónico</span>
+                        </label>
+                        <input type="email" id="email" name="email" required>
+                        <p class="error-message" id="error-email"></p>
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div class="form-group">
+                        <label for="phone">
+                            <span class="lang-en">Phone Number (with country code)</span><span class="separator"> / </span><span class="lang-es">Número de teléfono (con código de país)</span>
+                        </label>
+                        <input type="tel" id="phone" name="phone">
+                        <p class="error-message" id="error-phone"></p>
+                    </div>
+
+                    <!-- Country -->
+                    <div class="form-group">
+                        <label for="country">
+                            <span class="lang-en">Country</span><span class="separator"> / </span><span class="lang-es">País</span>
+                        </label>
+                        <select id="country" name="country" required>
+                            <option value="">
+                                <span class="lang-en">-- Select --</span><span class="separator"> / </span><span class="lang-es">-- Seleccionar --</span>
+                            </option>
+                            <option value="USA">USA</option>
+                            <option value="Canada">Canada</option>
+                            <option value="Mexico">Mexico</option>
+                            <option value="Jamaica">Jamaica</option>
+                            <option value="UK">United Kingdom</option>
+                            <option value="Australia">Australia</option>
+                            <option value="Other">
+                                <span class="lang-en">Other</span><span class="separator"> / </span><span class="lang-es">Otro</span>
+                            </option>
+                        </select>
+                        <p class="error-message" id="error-country"></p>
+                    </div>
+
+                    <!-- Preferred Language (Hidden input field for mailto data, set by the modal) -->
+                    <input type="hidden" id="preferred-language-hidden" name="preferredLanguage">
+
+                    <!-- Experience Level -->
+                    <div class="form-group">
+                        <label for="experience">
+                            <span class="lang-en">Experience Level</span><span class="separator"> / </span><span class="lang-es">Nivel de experiencia</span>
+                        </label>
+                        <select id="experience" name="experienceLevel" required>
+                            <option value="">
+                                <span class="lang-en">-- Select --</span><span class="separator"> / </span><span class="lang-es">-- Seleccionar --</span>
+                            </option>
+                            <option value="Beginner">
+                                <span class="lang-en">Beginner</span><span class="separator"> / </span><span class="lang-es">Principiante</span>
+                            </option>
+                            <option value="Intermediate">
+                                <span class="lang-en">Intermediate</span><span class="separator"> / </span><span class="lang-es">Intermedio</span>
+                            </option>
+                            <option value="Advanced">
+                                <span class="lang-en">Advanced</span><span class="separator"> / </span><span class="lang-es">Avanzado</span>
+                            </option>
+                        </select>
+                        <p class="error-message" id="error-experienceLevel"></p>
+                    </div>
+                    
+                    <!-- How did you hear about us? -->
+                    <div class="form-group full-width">
+                        <label for="source">
+                            <span class="lang-en">How did you hear about us?</span><span class="separator"> / </span><span class="lang-es">¿Cómo nos conociste?</span>
+                        </label>
+                        <select id="source" name="source">
+                            <option value="">
+                                <span class="lang-en">-- Select --</span><span class="separator"> / </span><span class="lang-es">-- Seleccionar --</span>
+                            </option>
+                            <option value="Facebook">Facebook</option>
+                            <option value="TikTok">TikTok</option>
+                            <option value="Friend">
+                                <span class="lang-en">Friend</span><span class="separator"> / </span><span class="lang-es">Amigo(a)</span>
+                            </option>
+                            <option value="Other">
+                                <span class="lang-en">Other</span><span class="separator"> / </span><span class="lang-es">Otro</span>
+                            </option>
+                        </select>
+                        <p class="error-message" id="error-source"></p>
+                    </div>
+
+                    <!-- Short Message -->
+                    <div class="form-group full-width">
+                        <label for="message">
+                            <span class="lang-en">Short Message (Optional)</span><span class="separator"> / </span><span class="lang-es">Mensaje corto (Opcional)</span>
+                        </label>
+                        <textarea id="message" name="shortMessage"></textarea>
+                        <p class="error-message" id="error-shortMessage"></p>
+                    </div>
+                    
+                    <!-- Consent Checkbox -->
+                    <div class="consent-group">
+                        <input type="checkbox" id="consent" name="consent" required>
+                        <label for="consent">
+                            <span class="lang-en">I agree to be contacted about Profit Ease System and understand my data will be handled according to the privacy notice.</span><span class="separator"> / </span><span class="lang-es">Acepto ser contactado(a) sobre Profit Ease System y entiendo que mis datos serán manejados según el aviso de privacidad.</span>
+                        </label>
+                        <p class="error-message" id="error-consent"></p>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submit-button">
+                        <span class="lang-en">Submit</span><span class="separator"> / </span><span class="lang-es">Enviar</span>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+
+        <!-- Privacy & Disclaimer Section -->
+        <section class="privacy-disclaimer">
+            <div class="container">
+                <h2>
+                    <span class="lang-en">Privacy & Disclaimer</span><span class="separator"> / </span><span class="lang-es">Privacidad y Aviso</span>
+                </h2>
+                <div class="disclaimer-content">
+                    <p>
+                        <span class="lang-en">We respect your privacy. The information you provide will be used only to contact you with updates and details about Profit Ease System.</span><span class="separator"> / </span><span class="lang-es">Respetamos tu privacidad. La información que proporciones se utilizará solo para contactarte con actualizaciones y detalles sobre Profit Ease System.</span>
+                    </p>
+                    <p>
+                        <span class="lang-en">Please do not submit bank details, card numbers, or government identification numbers through this form.</span><span class="separator"> / </span><span class="lang-es">Por favor, no envíes datos bancarios, números de tarjetas ni números de identificación gubernamental a través de este formulario.</span>
+                    </p>
+                    <p>
+                        <span class="lang-en">No specific earnings or profits are guaranteed.</span><span class="separator"> / </span><span class="lang-es">No se garantizan ganancias o beneficios específicos.</span>
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const form = document.getElementById('registration-form');
+        const formMessage = document.getElementById('form-message');
+        const body = document.body;
+        
+        // Modal elements
+        const langModalOverlay = document.getElementById('language-modal-overlay');
+        const selectEnBtn = document.getElementById('select-en');
+        const selectEsBtn = document.getElementById('select-es');
+
+        // Initial setup for the form message
+        formMessage.style.display = 'none';
+
+        const errorMessages = {
+            required: {
+                en: "This field is required.",
+                es: "Este campo es obligatorio."
+            },
+            email: {
+                en: "Please enter a valid email address.",
+                es: "Por favor, introduce un correo electrónico válido."
+            },
+            consent: {
+                en: "You must agree to the privacy notice.",
+                es: "Debes aceptar el aviso de privacidad."
+            }
+        };
+
+        // --- Language Switching (Sets body class and hidden input) ---
+        function toggleLanguage(lang) {
+            const className = lang === 'en' ? 'english' : 'spanish';
+            // Set body class to trigger the CSS rules
+            body.className = className;
+            localStorage.setItem('preferredLanguage', lang);
+            
+            // Set the hidden input value to the full language name for the mailto body
+            const preferredLangInput = document.getElementById('preferred-language-hidden');
+            if (preferredLangInput) {
+                preferredLangInput.value = lang === 'en' ? 'English' : 'Español';
+            }
+
+            // Re-run validation to update error messages if any are showing
+            validateForm(); 
+        }
+
+        // --- Modal Logic ---
+        function showLanguageModal() {
+            langModalOverlay.classList.add('open');
+            // Disable scrolling on the body while the modal is open
+            document.body.style.overflow = 'hidden'; 
+        }
+
+        function hideLanguageModal() {
+            langModalOverlay.classList.remove('open');
+            // Re-enable scrolling
+            document.body.style.overflow = ''; 
+        }
+
+        selectEnBtn.addEventListener('click', () => {
+            toggleLanguage('en');
+            hideLanguageModal();
+        });
+
+        selectEsBtn.addEventListener('click', () => {
+            toggleLanguage('es');
+            hideLanguageModal();
+        });
+
+        // Check for stored preference on page load
+        window.addEventListener('load', () => {
+            const storedLang = localStorage.getItem('preferredLanguage');
+            if (storedLang) {
+                toggleLanguage(storedLang);
+                // Set the hidden input value immediately for the mailto data
+                const langValue = storedLang === 'en' ? 'English' : 'Español';
+                const preferredLangInput = document.getElementById('preferred-language-hidden');
+                if(preferredLangInput) preferredLangInput.value = langValue;
+            } else {
+                // Show modal if no preference is stored
+                showLanguageModal();
+            }
+        });
+
+
+        // --- Validation Helpers ---
+
+        function getLang() {
+            return body.classList.contains('spanish') ? 'es' : 'en';
+        }
+
+        function showError(fieldId, errorKey) {
+            const errorElement = document.getElementById(`error-${fieldId}`);
+            if (errorElement) {
+                errorElement.textContent = errorMessages[errorKey][getLang()];
+            }
+        }
+
+        function clearError(fieldId) {
+            const errorElement = document.getElementById(`error-${fieldId}`);
+            if (errorElement) {
+                errorElement.textContent = '';
+            }
+        }
+
+        function isValidEmail(email) {
+            const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(String(email).toLowerCase());
+        }
+
+        function validateForm() {
+            let isValid = true;
+            
+            // Clear all errors before validation
+            const errorElements = document.querySelectorAll('.error-message');
+            errorElements.forEach(el => el.textContent = '');
+
+            const elements = form.elements;
+
+            // 1. Full Name (Required)
+            if (elements.fullName.value.trim() === '') {
+                showError('fullName', 'required');
+                isValid = false;
+            }
+
+            // 2. Email (Required & Format)
+            if (elements.email.value.trim() === '') {
+                showError('email', 'required');
+                isValid = false;
+            } else if (!isValidEmail(elements.email.value.trim())) {
+                showError('email', 'email');
+                isValid = false;
+            }
+            
+            // 3. Country (Required)
+            if (elements.country.value === '') {
+                showError('country', 'required');
+                isValid = false;
+            }
+            
+            // 4. Experience Level (Required)
+            if (elements.experienceLevel.value === '') {
+                showError('experienceLevel', 'required');
+                isValid = false;
+            }
+
+            // 5. Consent (Required)
+            if (!elements.consent.checked) {
+                showError('consent', 'consent');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+
+
+        // --- Form Submission Handler (mailto logic) ---
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            if (!validateForm()) {
+                 // If validation failed, scroll to the first error element
+                const firstError = document.querySelector('.error-message:not(:empty)');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+            
+            // Gather form data
+            const elements = form.elements;
+            let emailBody = getLang() === 'en' ? 
+                "--- New Profit Ease System Registration ---\n\n" : 
+                "--- Nuevo Registro en Profit Ease System ---\n\n";
+            
+            // Helper function to get the current label text
+            function getLabel(name) {
+                // Find the label associated with the element name/id
+                const labelElement = form.querySelector(`label[for="${name}"]`) || form.querySelector(`label:has([name="${name}"])`);
+                if (!labelElement) return name;
+
+                // Look for the language specific span within the label
+                const enSpan = labelElement.querySelector('.lang-en');
+                const esSpan = labelElement.querySelector('.lang-es');
+                
+                if (getLang() === 'en' && enSpan) return enSpan.textContent.trim();
+                if (getLang() === 'es' && esSpan) return esSpan.textContent.trim();
+                
+                // Fallback for fields not explicitly covered by lang spans (shouldn't happen now)
+                return labelElement.textContent.trim().split(/\s*[\/|]\s*/)[0]; 
+            }
+
+            // Append all fields to the email body
+            emailBody += `${getLabel('fullName')}: ${elements.fullName.value.trim()}\n`;
+            emailBody += `${getLabel('email')}: ${elements.email.value.trim()}\n`;
+            emailBody += `${getLabel('phone')}: ${elements.phone.value.trim() || 'N/A'}\n`;
+            emailBody += `${getLabel('country')}: ${elements.country.value}\n`;
+            // Retrieve the preferred language from the hidden input field
+            emailBody += `Preferred Language: ${elements.preferredLanguage.value || 'Not Selected'}\n`; 
+            emailBody += `${getLabel('experienceLevel')}: ${elements.experienceLevel.value}\n`;
+            emailBody += `${getLabel('source')}: ${elements.source.value || 'N/A'}\n`;
+            emailBody += `${getLabel('shortMessage')}: ${elements.shortMessage.value.trim() || 'N/A'}\n`;
+            emailBody += `Consent: ${elements.consent.checked ? 'Yes' : 'No'}\n\n`;
+            emailBody += `--- End of Submission Data ---\n`;
+            
+            const subject = getLang() === 'en' ? 
+                'New Profit Ease System Registration' : 
+                'Nuevo Registro en Profit Ease System';
+
+            // Construct the mailto link
+            const mailtoUrl = `mailto:indepententchelsea7@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
+            
+            // Redirect the user to their mail client
+            window.location.href = mailtoUrl;
+
+            // Display a temporary message to the user before they leave the form view
+            formMessage.style.backgroundColor = '#D4EDDA';
+            formMessage.style.display = 'block';
+            formMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+
+        });
+
+        // Re-validate errors on input change for better UX
+        const formFields = document.querySelectorAll('#registration-form input, #registration-form select, #registration-form textarea');
+        formFields.forEach(field => {
+            field.addEventListener('input', () => {
+                // Small delay to prevent running validation too often
+                setTimeout(validateForm, 50); 
+            });
+            // Consent checkbox needs immediate re-validation on change
+            if (field.type === 'checkbox') {
+                 field.addEventListener('change', () => validateForm());
+            }
+        });
+
+    </script>
+</body>
+</html>
