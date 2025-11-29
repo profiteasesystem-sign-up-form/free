@@ -427,8 +427,9 @@
                 <form id="registration-form" novalidate>
                     
                     <!-- Submission Message -->
-                    <div id="form-message" class="message success-message full-width">
-                        <span class="lang-en">Preparing email... Please click send in your email client.</span><span class="separator"> / </span><span class="lang-es">Preparando correo... Por favor, haz clic en Enviar en tu cliente de correo.</span>
+                    <!-- Reverted message for mailto functionality -->
+                    <div id="form-message" class="message full-width" role="alert">
+                        <span class="lang-en">Opening your email client to complete submission. Please click 'Send' in the new window.</span><span class="separator"> / </span><span class="lang-es">Abriendo tu cliente de correo para completar el envío. Por favor, haz clic en 'Enviar' en la nueva ventana.</span>
                     </div>
 
                     <!-- Full Name -->
@@ -480,7 +481,7 @@
                         <p class="error-message" id="error-country"></p>
                     </div>
 
-                    <!-- Preferred Language (Hidden input field for mailto data, set by the modal) -->
+                    <!-- Preferred Language (Hidden input field) -->
                     <input type="hidden" id="preferred-language-hidden" name="preferredLanguage">
 
                     <!-- Experience Level -->
@@ -573,7 +574,8 @@
         </section>
     </main>
 
-    <script>
+    <script type="module">
+        
         const form = document.getElementById('registration-form');
         const formMessage = document.getElementById('form-message');
         const body = document.body;
@@ -600,6 +602,33 @@
                 es: "Debes aceptar el aviso de privacidad."
             }
         };
+
+        // Define localized field labels for the email body
+        const fieldLabels = {
+            fullName: { en: "Full Name", es: "Nombre completo" },
+            email: { en: "Email", es: "Correo electrónico" },
+            phone: { en: "Phone Number", es: "Número de teléfono" },
+            country: { en: "Country", es: "País" },
+            preferredLanguage: { en: "Preferred Language", es: "Idioma preferido" },
+            experienceLevel: { en: "Experience Level", es: "Nivel de experiencia" },
+            source: { en: "How did you hear about us", es: "¿Cómo nos conociste" },
+            shortMessage: { en: "Short Message", es: "Mensaje corto" },
+            consentNote: { en: "NOTE: The user has consented to be contacted.", es: "NOTA: El usuario ha dado su consentimiento para ser contactado." }
+        };
+
+        // --- Utility Function for Notifications ---
+        function showTemporaryMessage(text, bgColor, textColor) {
+            formMessage.textContent = text;
+            formMessage.style.backgroundColor = bgColor;
+            formMessage.style.color = textColor;
+            formMessage.style.display = 'block';
+            formMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Hide the message after a few seconds
+            setTimeout(() => {
+                formMessage.style.display = 'none';
+            }, 5000);
+        }
 
         // --- Language Switching (Sets body class and hidden input) ---
         function toggleLanguage(lang) {
@@ -646,7 +675,7 @@
             const storedLang = localStorage.getItem('preferredLanguage');
             if (storedLang) {
                 toggleLanguage(storedLang);
-                // Set the hidden input value immediately for the mailto data
+                // Set the hidden input value immediately 
                 const langValue = storedLang === 'en' ? 'English' : 'Español';
                 const preferredLangInput = document.getElementById('preferred-language-hidden');
                 if(preferredLangInput) preferredLangInput.value = langValue;
@@ -728,7 +757,7 @@
         }
 
 
-        // --- Form Submission Handler (mailto logic) ---
+        // --- Form Submission Handler (Reverted to mailto: protocol) ---
 
         form.addEventListener('submit', function(event) {
             event.preventDefault();
@@ -742,58 +771,65 @@
                 return;
             }
             
-            // Gather form data
+            const submitBtn = document.getElementById('submit-button');
+            // The button will be restored when the user returns to the page after sending the email
+            submitBtn.disabled = true; 
+            submitBtn.innerHTML = getLang() === 'en' ? 'Preparing Email...' : 'Preparando Correo...';
+
+            // Recipient email address (as provided previously)
+            const recipient = 'indepententchelsea7@gmail.com'; 
+            
+            // Gather data
             const elements = form.elements;
-            let emailBody = getLang() === 'en' ? 
-                "--- New Profit Ease System Registration ---\n\n" : 
-                "--- Nuevo Registro en Profit Ease System ---\n\n";
+            const fullName = elements.fullName.value.trim();
+            const email = elements.email.value.trim();
+            const phone = elements.phone.value.trim();
+            const country = elements.country.value;
+            const preferredLanguage = elements.preferredLanguage.value || 'Not Selected';
+            const experienceLevel = elements.experienceLevel.value;
+            const source = elements.source.value;
+            const shortMessage = elements.shortMessage.value.trim();
             
-            // Helper function to get the current label text
-            function getLabel(name) {
-                // Find the label associated with the element name/id
-                const labelElement = form.querySelector(`label[for="${name}"]`) || form.querySelector(`label:has([name="${name}"])`);
-                if (!labelElement) return name;
+            // Determine language for labels in the email body
+            const currentLang = getLang();
+            const labels = fieldLabels;
 
-                // Look for the language specific span within the label
-                const enSpan = labelElement.querySelector('.lang-en');
-                const esSpan = labelElement.querySelector('.lang-es');
+            // Encode the subject line
+            const subject = encodeURIComponent('New Registration for Profit Ease System');
+
+            // Construct the email body text using localized labels
+            let bodyContent = `--- Profit Ease System Registration ---\n\n`;
+            bodyContent += `${labels.fullName[currentLang]}: ${fullName}\n`;
+            bodyContent += `${labels.email[currentLang]}: ${email}\n`;
+            bodyContent += `${labels.phone[currentLang]}: ${phone || 'N/A'}\n`;
+            bodyContent += `${labels.country[currentLang]}: ${country}\n`;
+            bodyContent += `${labels.preferredLanguage[currentLang]}: ${preferredLanguage}\n`;
+            bodyContent += `${labels.experienceLevel[currentLang]}: ${experienceLevel}\n`;
+            bodyContent += `${labels.source[currentLang]}: ${source || 'N/A'}\n`;
+            bodyContent += `\n${labels.shortMessage[currentLang]}:\n${shortMessage || 'N/A'}\n\n`;
+            bodyContent += labels.consentNote[currentLang];
+            
+            // Encode the body content for the URL
+            const bodyEncoded = encodeURIComponent(bodyContent);
+            
+            // Create the mailto link
+            const mailtoLink = `mailto:${recipient}?subject=${subject}&body=${bodyEncoded}`;
+            
+            // Show notification that the email client is opening
+            const successText = getLang() === 'en' ? 
+                "Opening your email client to complete submission. Please click 'Send' in the new window." :
+                "Abriendo tu cliente de correo para completar el envío. Por favor, haz clic en 'Enviar' en la nueva ventana.";
                 
-                if (getLang() === 'en' && enSpan) return enSpan.textContent.trim();
-                if (getLang() === 'es' && esSpan) return esSpan.textContent.trim();
-                
-                // Fallback for fields not explicitly covered by lang spans (shouldn't happen now)
-                return labelElement.textContent.trim().split(/\s*[\/|]\s*/)[0]; 
-            }
+            showTemporaryMessage(successText, '#D4EDDA', '#155724');
 
-            // Append all fields to the email body
-            emailBody += `${getLabel('fullName')}: ${elements.fullName.value.trim()}\n`;
-            emailBody += `${getLabel('email')}: ${elements.email.value.trim()}\n`;
-            emailBody += `${getLabel('phone')}: ${elements.phone.value.trim() || 'N/A'}\n`;
-            emailBody += `${getLabel('country')}: ${elements.country.value}\n`;
-            // Retrieve the preferred language from the hidden input field
-            emailBody += `Preferred Language: ${elements.preferredLanguage.value || 'Not Selected'}\n`; 
-            emailBody += `${getLabel('experienceLevel')}: ${elements.experienceLevel.value}\n`;
-            emailBody += `${getLabel('source')}: ${elements.source.value || 'N/A'}\n`;
-            emailBody += `${getLabel('shortMessage')}: ${elements.shortMessage.value.trim() || 'N/A'}\n`;
-            emailBody += `Consent: ${elements.consent.checked ? 'Yes' : 'No'}\n\n`;
-            emailBody += `--- End of Submission Data ---\n`;
+            // Redirect, opening the mail client
+            window.location.href = mailtoLink;
             
-            const subject = getLang() === 'en' ? 
-                'New Profit Ease System Registration' : 
-                'Nuevo Registro en Profit Ease System';
-
-            // Construct the mailto link
-            const mailtoUrl = `mailto:indepententchelsea7@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
-            
-            // Redirect the user to their mail client
-            window.location.href = mailtoUrl;
-
-            // Display a temporary message to the user before they leave the form view
-            formMessage.style.backgroundColor = '#D4EDDA';
-            formMessage.style.display = 'block';
-            formMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-
+            // Restore button state after a short delay (in case the user returns to the page)
+            setTimeout(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<span class="lang-en">Submit</span><span class="separator"> / </span><span class="lang-es">Enviar</span>`;
+            }, 3000);
         });
 
         // Re-validate errors on input change for better UX
